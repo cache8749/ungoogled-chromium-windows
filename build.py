@@ -270,9 +270,14 @@ def main():
             source_tree,
             patch_bin_path=(source_tree / _PATCH_BIN_RELPATH)
         )
+        avx_patches = [
+            _ROOT_DIR / 'Chromium_Clang' / 'Windows' / 'win64-avx2.patch',
+            _ROOT_DIR / 'Chromium_Clang' / 'V8' / 'v8.patch'
+        ]
         patches.apply_patches(
-            patches.generate_patches_from_series(_ROOT_DIR / 'Chromium_Clang', resolve=True),
-            source_tree,
+            avx_patches,
+            tree_path=source_tree,
+            reverse=False,
             patch_bin_path=(source_tree / _PATCH_BIN_RELPATH)
         )
         enable_hevc_software_decoding(source_tree, _ROOT_DIR / 'enable-chromium-hevc-hardware-decoding') 

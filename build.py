@@ -103,6 +103,50 @@ def _make_tmp_paths():
     if not tmp_path.exists():
         tmp_path.mkdir()
 
+def enable_hevc_software_decoding(repo_src_dir: Path, patches_root: Path) -> None:
+    repo_src_dir = Path(repo_src_dir)
+    patches_root = Path(patches_root)
+
+    ffmpeg_dir = repo_src_dir / "third_party" / "ffmpeg"
+
+    add_parser_patch = patches_root / "add-hevc-ffmpeg-decoder-parser.patch"
+    add_parser_js    = patches_root / "add-hevc-ffmpeg-decoder-parser.js"
+    change_header    = patches_root / "change-libavcodec-header.patch"
+    enable_hevc      = patches_root / "enable-hevc-ffmpeg-decoding.patch"
+
+    def run(cmd, cwd: Path) -> None:
+        subprocess.run(cmd, cwd=str(cwd), check=True)
+
+    def try_git_am(patch_file: Path, cwd: Path) -> bool:
+        try:
+            run(["git", "am", str(patch_file)], cwd=cwd)
+            return True
+        except subprocess.CalledProcessError:
+            subprocess.run(["git", "am", "--abort"], cwd=str(cwd), check=False)
+            return False
+
+    ok = try_git_am(add_parser_patch, cwd=ffmpeg_dir)
+
+    if not ok:
+        run(["node", str(add_parser_js)], cwd=ffmpeg_dir)
+        if not try_git_am(change_header, cwd=ffmpeg_dir):
+            raise RuntimeError("Failed to apply change-libavcodec-header.patch")
+
+    if not try_git_am(enable_hevc, cwd=repo_src_dir):
+        raise RuntimeError("Failed to apply enable-hevc-ffmpeg-decoding.patch")
+
+def copy_widevine(_ROOT_DIR: Path, source_tree: Path) -> None:
+    src = Path(_ROOT_DIR) / "enable-chromium-hevc-hardware-decoding" / "widevine"
+    dst = Path(source_tree) / "third_party" / "widevine" / "cdm"
+
+    dst.parent.mkdir(parents=True, exist_ok=True)
+
+    for item in src.iterdir():
+        target = dst / item.name
+        if item.is_dir():
+            shutil.copytree(item, target, dirs_exist_ok=True)
+        else:
+            shutil.copy2(item, target)
 
 def main():
     """CLI Entrypoint"""
@@ -226,7 +270,13 @@ def main():
             source_tree,
             patch_bin_path=(source_tree / _PATCH_BIN_RELPATH)
         )
-
+        patches.apply_patches(
+            patches.generate_patches_from_series(_ROOT_DIR / 'Chromium_Clang', resolve=True),
+            source_tree,
+            patch_bin_path=(source_tree / _PATCH_BIN_RELPATH)
+        )
+        enable_hevc_software_decoding(source_tree, _ROOT_DIR / 'enable-chromium-hevc-hardware-decoding') 
+        copy_widevine(_ROOT_DIR, source_tree)
         # Substitute domains
         domain_substitution_list = (_ROOT_DIR / 'ungoogled-chromium' / 'domain_substitution.list') if args.tarball else (_ROOT_DIR  / 'domain_substitution.list')
         domain_substitution.apply_substitution(

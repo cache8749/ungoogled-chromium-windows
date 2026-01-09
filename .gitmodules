@@ -1,3 +1,9 @@
 [submodule "ungoogled-chromium"]
 	path = ungoogled-chromium
 	url = https://github.com/Eloston/ungoogled-chromium.git
+[submodule "enable-chromium-hevc-hardware-decoding"]
+	path = enable-chromium-hevc-hardware-decoding
+	url = https://github.com/StaZhu/enable-chromium-hevc-hardware-decoding.git
+[submodule "Chromium_Clang"]
+	path = Chromium_Clang
+	url = https://github.com/RobRich999/Chromium_Clang.git

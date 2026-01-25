@@ -230,7 +230,7 @@ def main():
         # Substitute domains
         domain_substitution_list = (_ROOT_DIR / 'ungoogled-chromium' / 'domain_substitution.list') if args.tarball else (_ROOT_DIR  / 'domain_substitution.list')
         domain_substitution.apply_substitution(
-            _ROOT_DIR / 'ungoogled-chromium' / 'domain_regex.list',
+            _ROOT_DIR / 'domain_regex.list',
             domain_substitution_list,
             source_tree,
             None

@@ -1,0 +1,5 @@
+--- a/build/config/compiler/BUILD.gn
++++ b/build/config/compiler/BUILD.gn
+@@
+-      cflags += [ "-msse3" ]
++      cflags += [ "-march=x86-64-v3" ]

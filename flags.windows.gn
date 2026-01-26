@@ -39,4 +39,3 @@ toolchain_supports_rust_thin_lto = true
 dcheck_always_on = false
 use_siso = true
 use_remoteexec = false
-skia_use_avx512 = false

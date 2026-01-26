@@ -52,17 +52,6 @@
          }
        }
      }
- 
-     # TODO(crbug.com/40192287): Investigate why/if this should be needed.
-     if (is_win) {
--      cflags += [ "/clang:-ffp-contract=off" ]
-+      cflags += [ "/clang:-ffp-contract=fast" ]
-     } else {
--      cflags += [ "-ffp-contract=off" ]
-+      cflags += [ "-ffp-contract=fast" ]
-     }
- 
-     # Enable ELF CREL (see crbug.com/357878242) for all platforms that use ELF.
 @@ -833,6 +833,7 @@ config("compiler") {
      cflags += [
        "-flto=thin",
@@ -89,7 +78,6 @@
      "-Zexternal-clangrt",
 +
 +     "-Ctarget-cpu=x86-64-v3",
-+     "-Cllvm-args=-fp-contract=fast",
    ]
  
    if (!is_win || force_rustc_color_output) {
@@ -232,7 +220,7 @@
      # next step after SSE2 will be AVX.
      if (current_cpu == "x86" || current_cpu == "x64") {
 -      cflags += [ "-msse3" ]
-+      cflags += [ "-mtune=haswell", "-msse3", "-mssse3","-msse4.1", "-msse4.2", "-mavx", "-mavx2", "-mfma", "-mf16c", "-mlzcnt", "-mbmi2", "/clang:-w", ]
++      cflags += [ "-mtune=znver3", "-msse3", "-mssse3","-msse4.1", "-msse4.2", "-mavx", "-mavx2", "-mfma", "-mf16c", "-mlzcnt", "-mbmi2", "/clang:-w", ]
      }
  
      # Enable ANSI escape codes if something emulating them is around (cmd.exe

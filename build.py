@@ -226,6 +226,9 @@ def main():
             source_tree,
             patch_bin_path=(source_tree / _PATCH_BIN_RELPATH)
         )
+        
+        Path(source_tree/'build'/'config'/'compiler'/'BUILD.gn').write_text(Path(source_tree/'build'/'config'/'compiler'/'BUILD.gn').read_text().replace('-msse3', '-march=x86-64-v3'))
+        Path(source_tree/'build'/'config'/'avx512.gni').write_text(Path(source_tree/'build'/'config'/'avx512.gni').read_text().replace('allow_avx512 = true', 'allow_avx512 = false'))
 
         # Substitute domains
         domain_substitution_list = (_ROOT_DIR / 'ungoogled-chromium' / 'domain_substitution.list') if args.tarball else (_ROOT_DIR  / 'domain_substitution.list')

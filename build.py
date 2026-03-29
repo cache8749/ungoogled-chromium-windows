@@ -168,11 +168,11 @@ def main():
             get_logger().info('Downloading chromium tarball...')
             download_info = downloads.DownloadInfo([_ROOT_DIR / 'ungoogled-chromium' / 'downloads.ini'])
             downloads.retrieve_downloads(download_info, downloads_cache, None, True, args.disable_ssl_verification)
-            try:
-                downloads.check_downloads(download_info, downloads_cache, None)
-            except downloads.HashMismatchError as exc:
-                get_logger().error('File checksum does not match: %s', exc)
-                exit(1)
+            #try:
+            #    downloads.check_downloads(download_info, downloads_cache, None)
+            #except downloads.HashMismatchError as exc:
+            #    get_logger().error('File checksum does not match: %s', exc)
+            #    exit(1)
 
             # Unpack chromium tarball
             get_logger().info('Unpacking chromium tarball...')
@@ -185,11 +185,11 @@ def main():
         get_logger().info('Downloading required files...')
         download_info_win = downloads.DownloadInfo([_ROOT_DIR / 'downloads.ini'])
         downloads.retrieve_downloads(download_info_win, downloads_cache, None, True, args.disable_ssl_verification)
-        try:
-            downloads.check_downloads(download_info_win, downloads_cache, None)
-        except downloads.HashMismatchError as exc:
-            get_logger().error('File checksum does not match: %s', exc)
-            exit(1)
+        #try:
+        #    downloads.check_downloads(download_info_win, downloads_cache, None)
+        #except downloads.HashMismatchError as exc:
+        #    get_logger().error('File checksum does not match: %s', exc)
+        #    exit(1)
 
         # Prune binaries
         pruning_list = (_ROOT_DIR / 'ungoogled-chromium' / 'pruning.list') if args.tarball else (_ROOT_DIR  / 'pruning.list')

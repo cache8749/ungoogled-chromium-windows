@@ -17,6 +17,7 @@ import os
 import platform
 from pathlib import Path
 import shutil
+import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / 'ungoogled-chromium' / 'utils'))
 import filescfg
@@ -61,10 +62,19 @@ def main():
 
     build_outputs = Path('build/src/out/Default')
 
+    target_cpu = _get_target_cpu(build_outputs)
+    chromium_version = get_chromium_version()
+    release_revision = _get_release_revision()
+    packaging_revision = _get_packaging_revision()
+
     shutil.copyfile('build/src/out/Default/mini_installer.exe',
         'build/ungoogled-chromium_{}-{}.{}_installer_{}.exe'.format(
-            get_chromium_version(), _get_release_revision(),
-            _get_packaging_revision(), _get_target_cpu(build_outputs)))
+            chromium_version, release_revision, packaging_revision, target_cpu))
+
+    chromedriver_zip = Path('build/ungoogled-chromium_{}-{}.{}_chromedriver_{}.zip'.format(
+        chromium_version, release_revision, packaging_revision, target_cpu))
+    with zipfile.ZipFile(chromedriver_zip, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.write('build/src/out/Default/chromedriver.exe', 'chromedriver.exe')
 
     timestamp = None
     try:
@@ -74,8 +84,7 @@ def main():
         pass
 
     output = Path('build/ungoogled-chromium_{}-{}.{}_windows_{}.zip'.format(
-        get_chromium_version(), _get_release_revision(),
-        _get_packaging_revision(), _get_target_cpu(build_outputs)))
+        chromium_version, release_revision, packaging_revision, target_cpu))
 
     excluded_files = set([
         Path('mini_installer.exe'),

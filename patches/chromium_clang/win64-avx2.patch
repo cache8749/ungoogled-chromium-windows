@@ -76,64 +76,6 @@ index 7830ba2ed2366..6d54a2c9ebb54 100644
        if (target_os == "chromeos" && cros_target_cpu_arch != "" &&
            is_a_target_toolchain) {
          cflags += [ "-march=$cros_target_cpu_arch" ]
-@@ -2782,6 +2793,57 @@ if (is_win) {
-     ]
-   }
-   common_optimize_on_ldflags = []
-+  common_optimize_on_ldflags += [
-+    "-mllvm:-memdep-block-scan-limit=1000",
-+    "-mllvm:-aggressive-ext-opt",
-+    "-mllvm:-costmodel-reduxcost",
-+    "-mllvm:-enable-cold-section",
-+    "-mllvm:-enable-cond-stores-vec",
-+    "-mllvm:-enable-dfa-jump-thread",
-+    "-mllvm:-enable-gvn-hoist",
-+    "-mllvm:-enable-gvn-sink",
-+    "-mllvm:-enable-interleaved-mem-accesses",
-+    "-mllvm:-enable-ipra",
-+    "-mllvm:-enable-load-pre",
-+    "-mllvm:-enable-local-reassign",
-+    "-mllvm:-enable-loop-distribute",
-+    "-mllvm:-enable-loop-flatten",
-+    "-mllvm:-enable-loop-versioning-licm",
-+    "-mllvm:-enable-loopinterchange",
-+    "-mllvm:-x86-machine-combiner=true",
-+    "-mllvm:-enable-masked-interleaved-mem-accesses",
-+    "-mllvm:-enable-nontrivial-unswitch",
-+    "-mllvm:-enable-unroll-and-jam",
-+    "-mllvm:-exhaustive-register-search",
-+    "-mllvm:-force-precise-rotation-cost",
-+    "-mllvm:-force-vector-interleave=4",
-+    "-mllvm:-gvn-hoist-max-bbs=-1",
-+    "-mllvm:-gvn-hoist-max-chain-length=-1",
-+    "-mllvm:-gvn-hoist-max-depth=-1",
-+    "-mllvm:-inline-enable-cost-benefit-analysis",
-+    "-mllvm:-jump-threading-threshold=30",
-+    "-mllvm:-rotation-max-header-size=64",
-+    "-mllvm:-lsr-complexity-limit=2147483647",
-+    "-mllvm:-machine-sink-split",
-+    "-mllvm:-misched-cluster=true",
-+    "-mllvm:-phi-node-folding-threshold=3",
-+    "-mllvm:-precise-rotation-cost",
-+    "-mllvm:-scalar-evolution-max-add-rec-size=1000",
-+    "-mllvm:-simplifycfg-sink-common",
-+    "-mllvm:-sink-insts-to-avoid-spills",
-+    "-mllvm:-slp-vectorize-hor-store",
-+    "-mllvm:-spec-exec-max-speculation-cost=10",
-+    "-mllvm:-tail-merge-threshold=100",
-+    "-mllvm:-unroll-allow-partial",
-+    "-mllvm:-unroll-runtime-epilog",
-+    "-mllvm:-vectorizer-maximize-bandwidth",
-+    "-mllvm:-x86-cmov-converter",
-+    "-mllvm:-x86-early-ifcvt",
-+    "-mllvm:-x86-pad-for-align",
-+    "-mllvm:-scheditins",
-+    "-mllvm:-x86-use-vzeroupper",
-+    "-mllvm:-frame-pointer=all",
-+  ]
- 
-   # /OPT:ICF is not desirable in Debug builds, since code-folding can result in
-   # misleading symbols in stack traces.
 @@ -2898,10 +2959,8 @@ config("optimize") {
    if (is_win) {
      # clang-cl's /O2 corresponds to clang's -O3, and really want -O2 for

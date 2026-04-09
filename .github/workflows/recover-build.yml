@@ -1,0 +1,84 @@
+name: recover-build
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Run ID that has the intermediate build-artifact to resume from'
+        required: true
+      artifact_name:
+        description: 'Intermediate artifact name to download'
+        required: false
+        default: 'build-artifact'
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  recover:
+    runs-on: windows-2022
+    timeout-minutes: 360
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Copy workspace
+        shell: pwsh
+        run: Copy-Item -Path . -Destination 'C:\ungoogled-chromium-windows' -Recurse
+
+      - name: Setup Stage dependencies
+        shell: pwsh
+        working-directory: ./.github/actions/stage
+        run: npm install
+
+      - name: Download intermediate artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: C:\ungoogled-chromium-windows\build
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.run_id }}
+
+      - name: Extract artifact
+        shell: pwsh
+        run: |
+          Write-Host "Extracting artifacts.zip..."
+          7z x 'C:\ungoogled-chromium-windows\build\artifacts.zip' -o'C:\ungoogled-chromium-windows\build' -y
+          Remove-Item 'C:\ungoogled-chromium-windows\build\artifacts.zip' -Force
+          Write-Host "Extraction complete."
+
+      - name: Resolve vcvars path
+        id: vs
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $installPath = & $vswhere -prerelease -latest -property installationPath
+          $vcvars = "$installPath\VC\Auxiliary\Build\vcvars64.bat"
+          if (-not (Test-Path $vcvars)) { throw "vcvars64.bat not found at $vcvars" }
+          Write-Host "vcvars: $vcvars"
+          echo "vcvars=$vcvars" >> $env:GITHUB_OUTPUT
+
+      - name: Run ninja (final stage)
+        shell: cmd
+        timeout-minutes: 210
+        run: |
+          call "${{ steps.vs.outputs.vcvars }}" >nul
+          set DEPOT_TOOLS_WIN_TOOLCHAIN=0
+          cd /d C:\ungoogled-chromium-windows\build\src
+          "third_party\ninja\ninja.exe" -j 2 -C out\Default chrome chromedriver mini_installer
+          if errorlevel 1 exit /b 1
+
+      - name: Upload out\Default as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chromium
+          path: C:\ungoogled-chromium-windows\build\src\out\Default\**
+          retention-days: 4
+          compression-level: 0

@@ -182,13 +182,19 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: chromium
-          path: artifacts/**/ungoogled-chromium*
+          path: |
+            artifacts/**/mini_installer.exe
+            artifacts/**/setup.exe
+            artifacts/**/chromedriver.exe
           retention-days: 90
-          
+
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.resolve-release-context.outputs.target_tag }}
           fail_on_unmatched_files: true
           overwrite_files: true
-          files: artifacts/**/ungoogled-chromium*
+          files: |
+            artifacts/**/mini_installer.exe
+            artifacts/**/setup.exe
+            artifacts/**/chromedriver.exe

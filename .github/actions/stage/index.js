@@ -43,9 +43,10 @@ async function run() {
     });
     if (retCode === 0) {
         core.setOutput('finished', true);
-        const globber = await glob.create('C:\\ungoogled-chromium-windows\\build\\ungoogled-chromium*',
-            {matchDirectories: false});
+        const outDir = 'C:\\ungoogled-chromium-windows\\build\\src\\out\\Default';
+        const globber = await glob.create(`${outDir}\\**\\*`, {matchDirectories: false});
         let packageList = await globber.glob();
+        console.log(`Uploading ${packageList.length} files from ${outDir}`);
         const finalArtifactName = x86 ? 'chromium-x86' : (arm ? 'chromium-arm' : 'chromium');
         for (let i = 0; i < 5; ++i) {
             try {
@@ -55,7 +56,7 @@ async function run() {
             }
             try {
                 await artifact.uploadArtifact(finalArtifactName, packageList,
-                    'C:\\ungoogled-chromium-windows\\build', {retentionDays: 4, compressionLevel: 0});
+                    outDir, {retentionDays: 4, compressionLevel: 0});
                 break;
             } catch (e) {
                 console.error(`Upload artifact failed: ${e}`);
